@@ -70,6 +70,7 @@ if uploaded_file is not None:
             new_hero_data['hero_name'] = new_hero_name
             new_hero_df = pd.DataFrame([new_hero_data])
 
+            # Pastikan untuk menambah hero baru ke dalam session state data_cleaned
             if st.session_state['data_cleaned'] is not None:
                 st.session_state['data_cleaned'] = pd.concat(
                     [st.session_state['data_cleaned'], new_hero_df], ignore_index=True
@@ -80,6 +81,8 @@ if uploaded_file is not None:
             st.success(f"Hero {new_hero_name} berhasil ditambahkan!")
             st.subheader("Dataset yang Diperbarui")
             st.dataframe(st.session_state['data_cleaned'])
+        else:
+            st.error("Nama hero harus diisi!")
 
     # Penambangan Aturan Asosiasi
     st.subheader("Penambangan Aturan Asosiasi")
