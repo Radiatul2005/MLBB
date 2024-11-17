@@ -89,39 +89,43 @@ if uploaded_file is not None:
 
         # Jalankan algoritma Apriori
         min_support = st.slider("Minimum Support", min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+        
+        try:
+            frequent_itemsets = apriori(binary_data, min_support=min_support, use_colnames=True)
+            # Filter frequent itemsets yang di bawah nilai min_support
+            frequent_itemsets = frequent_itemsets[frequent_itemsets['support'] >= min_support]
+            
+            st.write(f"Frequent Itemsets: {frequent_itemsets}")
 
-        # Pastikan data binaris hanya terdiri dari nilai 0 dan 1
-        binary_data = binary_data.applymap(lambda x: 1 if x > 0.5 else 0)
+            # Buat aturan asosiasi
+            min_confidence = st.slider("Minimum Confidence", min_value=0.1, max_value=1.0, value=0.5, step=0.1)
+            
+            rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=min_confidence)
 
-        # Jalankan Apriori untuk menemukan frequent itemsets
-        frequent_itemsets = apriori(binary_data, min_support=min_support, use_colnames=True)
+            # Hilangkan istilah teknis 'frozenset' untuk output yang lebih bersih
+            rules['antecedents'] = rules['antecedents'].apply(lambda x: ', '.join(list(x)))
+            rules['consequents'] = rules['consequents'].apply(lambda x: ', '.join(list(x)))
 
-        # Buat aturan asosiasi
-        min_confidence = st.slider("Minimum Confidence", min_value=0.1, max_value=1.0, value=0.5, step=0.1)
-        rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=min_confidence)
+            # Tambahkan catatan untuk menjelaskan parameter dan output
+            st.subheader("Catatan Penting")
+            st.markdown("""
+            - **Minimum Support**: Ini adalah nilai ambang untuk menentukan seberapa sering sebuah kombinasi item muncul dalam data. Misalnya, jika Anda memilih 0.1 (10%), hanya kombinasi yang muncul di setidaknya 10% data yang akan dipertimbangkan.
+            - **Minimum Confidence**: Ini menunjukkan seberapa sering aturan ditemukan benar ketika item di bagian awal aturan (antecedent) ada. Contoh, confidence 0.5 berarti aturan tersebut benar dalam 50% kasus.
+            - **Aturan Asosiasi**: Aturan ini menunjukkan hubungan antara atribut-atribut dalam data. Kolom 'antecedents' (sebelumnya) dan 'consequents' (konsekuensi) menunjukkan item yang berasosiasi.
+            """)
 
-        # Hilangkan istilah teknis 'frozenset' untuk output yang lebih bersih
-        rules['antecedents'] = rules['antecedents'].apply(lambda x: ', '.join(list(x)))
-        rules['consequents'] = rules['consequents'].apply(lambda x: ', '.join(list(x)))
+            st.write("Aturan Asosiasi")
+            st.dataframe(rules)
 
-        # Tambahkan catatan untuk menjelaskan parameter dan output
-        st.subheader("Catatan Penting")
-        st.markdown(""" 
-        - **Minimum Support**: Ini adalah nilai ambang untuk menentukan seberapa sering sebuah kombinasi item muncul dalam data. Misalnya, jika Anda memilih 0.1 (10%), hanya kombinasi yang muncul di setidaknya 10% data yang akan dipertimbangkan.
-        - **Minimum Confidence**: Ini menunjukkan seberapa sering aturan ditemukan benar ketika item di bagian awal aturan (antecedent) ada. Contoh, confidence 0.5 berarti aturan tersebut benar dalam 50% kasus.
-        - **Aturan Asosiasi**: Aturan ini menunjukkan hubungan antara atribut-atribut dalam data. Kolom 'antecedents' (sebelumnya) dan 'consequents' (konsekuensi) menunjukkan item yang berasosiasi.
-        """)
+            # Filter aturan untuk wawasan khusus
+            if st.checkbox("Filter Aturan"):
+                antecedent = st.text_input("Filter berdasarkan Antecedent (misalnya, 'defense_overall')")
+                if antecedent:
+                    filtered_rules = rules[rules['antecedents'].apply(lambda x: antecedent in str(x))]
+                    st.write("Aturan yang Difilter")
+                    st.dataframe(filtered_rules)
 
-        st.write("Aturan Asosiasi")
-        st.dataframe(rules)
-
-        # Filter aturan untuk wawasan khusus
-        if st.checkbox("Filter Aturan"):
-            antecedent = st.text_input("Filter berdasarkan Antecedent (misalnya, 'defense_overall')")
-            if antecedent:
-                filtered_rules = rules[rules['antecedents'].apply(lambda x: antecedent in str(x))]
-                st.write("Aturan yang Difilter")
-                st.dataframe(filtered_rules)
-
+        except Exception as e:
+            st.write(f"Error: {e}")
 else:
     st.write("Silakan unggah file CSV untuk melanjutkan.")
