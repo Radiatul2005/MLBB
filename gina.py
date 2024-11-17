@@ -59,26 +59,21 @@ if uploaded_file is not None:
     hero_names = st.session_state['data_cleaned']['hero_name'].unique()
     selected_hero = st.selectbox("Pilih Hero", hero_names)
 
-    # Tampilkan atribut hero yang dipilih
+    # Tampilkan atribut hero yang dipilih dalam bentuk grafik
     if selected_hero:
         hero_data = st.session_state['data_cleaned'][st.session_state['data_cleaned']['hero_name'] == selected_hero]
+        hero_data = hero_data[features].iloc[0]
+
         st.subheader(f"Atribut Hero {selected_hero}")
-        st.dataframe(hero_data)
-
-        # Modifikasi atribut hero
-        st.subheader(f"Modifikasi Atribut Hero {selected_hero}")
-        updated_data = hero_data.copy()
-        for feature in features:
-            updated_data[feature] = st.number_input(
-                f"Ubah {feature.replace('_', ' ').capitalize()}",
-                min_value=0.0, max_value=1.0, value=float(hero_data[feature].values[0]), step=0.01, key=f"{feature}_update"
-            )
-
-        if st.button(f"Simpan Perubahan untuk {selected_hero}"):
-            # Update data hero yang dipilih
-            st.session_state['data_cleaned'].update(updated_data)
-            st.success(f"Atribut {selected_hero} berhasil diperbarui!")
-            st.dataframe(st.session_state['data_cleaned'][st.session_state['data_cleaned']['hero_name'] == selected_hero])
+        
+        # Buat bar chart untuk atribut hero
+        fig, ax = plt.subplots(figsize=(10, 6))
+        hero_data.plot(kind='bar', ax=ax, color='skyblue')
+        ax.set_title(f"Atribut Hero {selected_hero}")
+        ax.set_ylabel("Nilai Atribut")
+        ax.set_xlabel("Atribut")
+        ax.set_xticklabels(hero_data.index, rotation=45, ha="right")
+        st.pyplot(fig)
 
     # Penambangan Aturan Asosiasi
     st.subheader("Penambangan Aturan Asosiasi")
