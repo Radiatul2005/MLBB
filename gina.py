@@ -95,6 +95,9 @@ if uploaded_file is not None:
         if frequent_itemsets.empty:
             st.error("Tidak ada frequent itemsets yang ditemukan. Coba kurangi nilai Minimum Support.")
         else:
+            st.write("Frequent Itemsets:")
+            st.dataframe(frequent_itemsets)
+
             # Filter frequent itemsets yang di bawah nilai min_support
             frequent_itemsets = frequent_itemsets[frequent_itemsets['support'] >= min_support]
 
@@ -108,13 +111,13 @@ if uploaded_file is not None:
 
             # Tambahkan catatan untuk menjelaskan parameter dan output
             st.subheader("Catatan Penting")
-            st.markdown(""" 
+            st.markdown("""
             - **Minimum Support**: Ini adalah nilai ambang untuk menentukan seberapa sering sebuah kombinasi item muncul dalam data. Misalnya, jika Anda memilih 0.1 (10%), hanya kombinasi yang muncul di setidaknya 10% data yang akan dipertimbangkan.
             - **Minimum Confidence**: Ini menunjukkan seberapa sering aturan ditemukan benar ketika item di bagian awal aturan (antecedent) ada. Contoh, confidence 0.5 berarti aturan tersebut benar dalam 50% kasus.
             - **Aturan Asosiasi**: Aturan ini menunjukkan hubungan antara atribut-atribut dalam data. Kolom 'antecedents' (sebelumnya) dan 'consequents' (konsekuensi) menunjukkan item yang berasosiasi.
             """)
 
-            st.write("Aturan Asosiasi")
+            st.write("Aturan Asosiasi:")
             st.dataframe(rules)
 
             # Filter aturan untuk wawasan khusus
@@ -124,5 +127,6 @@ if uploaded_file is not None:
                     filtered_rules = rules[rules['antecedents'].apply(lambda x: antecedent in str(x))]
                     st.write("Aturan yang Difilter")
                     st.dataframe(filtered_rules)
+
 else:
     st.write("Silakan unggah file CSV untuk melanjutkan.")
