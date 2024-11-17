@@ -54,63 +54,31 @@ if uploaded_file is not None:
         st.subheader("Dataset yang Diproses")
         st.dataframe(st.session_state['data_cleaned'])
 
-    # Tambah data hero baru
-    st.subheader("Tambahkan Data Hero Baru")
-    new_hero_name = st.text_input("Nama Hero")
-    new_hero_data = {}
-    for feature in features:
-        new_hero_data[feature] = st.number_input(
-            f"{feature.replace('_', ' ').capitalize()}",
-            min_value=0.0, value=0.5, step=0.01, key=f"{feature}_new"
-        )
+    # Pilih hero untuk melihat atribut
+    st.subheader("Pilih Hero untuk Lihat Atribut")
+    hero_names = st.session_state['data_cleaned']['hero_name'].unique()
+    selected_hero = st.selectbox("Pilih Hero", hero_names)
 
-    if st.button("Tambahkan Hero"):
-        if new_hero_name:
-            # Tambahkan data hero baru sebagai baris di dataset
-            new_hero_data['hero_name'] = new_hero_name
-            new_hero_df = pd.DataFrame([new_hero_data])
+    # Tampilkan atribut hero yang dipilih
+    if selected_hero:
+        hero_data = st.session_state['data_cleaned'][st.session_state['data_cleaned']['hero_name'] == selected_hero]
+        st.subheader(f"Atribut Hero {selected_hero}")
+        st.dataframe(hero_data)
 
-            # Pastikan untuk menambah hero baru ke dalam session state data_cleaned
-            if st.session_state['data_cleaned'] is not None:
-                st.session_state['data_cleaned'] = pd.concat(
-                    [st.session_state['data_cleaned'], new_hero_df], ignore_index=True
-                )
-            else:
-                st.session_state['data_cleaned'] = new_hero_df
+        # Modifikasi atribut hero
+        st.subheader(f"Modifikasi Atribut Hero {selected_hero}")
+        updated_data = hero_data.copy()
+        for feature in features:
+            updated_data[feature] = st.number_input(
+                f"Ubah {feature.replace('_', ' ').capitalize()}",
+                min_value=0.0, max_value=1.0, value=float(hero_data[feature].values[0]), step=0.01, key=f"{feature}_update"
+            )
 
-            st.success(f"Hero {new_hero_name} berhasil ditambahkan!")
-            st.subheader("Dataset yang Diperbarui")
-            st.dataframe(st.session_state['data_cleaned'])
-        else:
-            st.error("Nama hero harus diisi!")
-
-    # Visualisasi Data
-    st.subheader("Visualisasi Data")
-    if st.session_state['data_cleaned'] is not None:
-        # Pilihan Atribut untuk Visualisasi
-        attribute_choice = st.selectbox(
-            "Pilih Atribut untuk Visualisasi",
-            ['Physical Attack Distribution', 'Pick Rate vs Win Rate', 'Mana vs HP']
-        )
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-
-        if attribute_choice == 'Physical Attack Distribution':
-            st.write("Distribusi Fitur Physical Attack Hero")
-            sns.histplot(st.session_state['data_cleaned']['physical_atk'], kde=True, ax=ax)
-            ax.set_title('Distribusi Physical Attack')
-        
-        elif attribute_choice == 'Pick Rate vs Win Rate':
-            st.write("Visualisasi Hubungan Pick Rate dan Win Rate")
-            sns.scatterplot(data=st.session_state['data_cleaned'], x='pick_rate', y='win_rate', ax=ax)
-            ax.set_title('Pick Rate vs Win Rate')
-
-        elif attribute_choice == 'Mana vs HP':
-            st.write("Visualisasi Hubungan Mana dan HP")
-            sns.scatterplot(data=st.session_state['data_cleaned'], x='mana', y='hp', ax=ax)
-            ax.set_title('Mana vs HP')
-
-        st.pyplot(fig)
+        if st.button(f"Simpan Perubahan untuk {selected_hero}"):
+            # Update data hero yang dipilih
+            st.session_state['data_cleaned'].update(updated_data)
+            st.success(f"Atribut {selected_hero} berhasil diperbarui!")
+            st.dataframe(st.session_state['data_cleaned'][st.session_state['data_cleaned']['hero_name'] == selected_hero])
 
     # Penambangan Aturan Asosiasi
     st.subheader("Penambangan Aturan Asosiasi")
