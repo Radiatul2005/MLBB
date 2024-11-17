@@ -3,4 +3,5 @@ pandas
 seaborn
 matplotlib
 scikit-learn
-mlxtend
+mlxtend==0.24.1
+
