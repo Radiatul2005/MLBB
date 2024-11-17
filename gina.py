@@ -97,7 +97,7 @@ if uploaded_file is not None:
         # Buat aturan asosiasi
         min_confidence = st.slider("Minimum Confidence", min_value=0.1, max_value=1.0, value=0.5, step=0.1)
         try:
-            # Hanya gunakan frequent_itemsets dan metric tanpa num_itemsets
+            # Fungsi association_rules tanpa parameter 'num_itemsets'
             rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=min_confidence)
 
             # Hilangkan istilah teknis 'frozenset' untuk output yang lebih bersih
