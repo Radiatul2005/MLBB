@@ -84,6 +84,21 @@ if uploaded_file is not None:
         else:
             st.error("Nama hero harus diisi!")
 
+    # Visualisasi Data
+    st.subheader("Visualisasi Data")
+    if st.session_state['data_cleaned'] is not None:
+        st.write("Distribusi Fitur Fisik Hero")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.histplot(st.session_state['data_cleaned']['physical_atk'], kde=True, ax=ax)
+        ax.set_title('Distribusi Physical Attack')
+        st.pyplot(fig)
+
+        st.write("Visualisasi Hubungan Pick Rate dan Win Rate")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.scatterplot(data=st.session_state['data_cleaned'], x='pick_rate', y='win_rate', ax=ax)
+        ax.set_title('Pick Rate vs Win Rate')
+        st.pyplot(fig)
+
     # Penambangan Aturan Asosiasi
     st.subheader("Penambangan Aturan Asosiasi")
     if st.session_state['data_cleaned'] is not None:
